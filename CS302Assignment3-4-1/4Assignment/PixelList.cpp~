@@ -1,0 +1,107 @@
+#include "PixelList.h"
+//Constructor-------------------------------------------------------------------
+PixelList::PixelList()
+{
+  length = 0;
+  listData = NULL;
+}
+//------------------------------------------------------------------------------
+int PixelList::GetLength() const
+{
+  return length;
+}
+//------------------------------------------------------------------------------
+void PixelList::MakeEmpty()
+{
+  PixelListNode* tempPtr;
+
+    while (listData != NULL)
+    {
+      tempPtr = listData;
+      listData = listData->next;
+      delete tempPtr;
+  }
+  length = 0;
+}
+//------------------------------------------------------------------------------
+void PixelList::InsertPixelNode(int popx, int popy)
+{
+  PixelListNode* newNode;			// Declare a pointer to a node
+
+  newNode = new PixelListNode;	// Get a new node 
+  newNode->i = popx;
+  newNode->i = popy;					// Store the PixelNode in the node
+  newNode->next = listData;		// Store address of first node in
+											// next field of new node
+  listData = newNode;				// Store address of new node into
+											// external pointer
+  length++;								// Increment length of the list
+}
+//------------------------------------------------------------------------------
+void PixelList::RetrievePixelNode(PixelListNode& PixelNode, bool& found)
+{
+  bool moreToSearch;
+  PixelListNode* location;
+
+  location = listData;
+  found = false;
+  moreToSearch = (location != NULL);
+
+  while (moreToSearch && !found) 
+  {
+    switch (PixelNode.ComparedTo(info[location]))
+    {
+      case LESS    : 
+      case GREATER : location = location->next;
+                     moreToSearch = (location != NULL);
+                     break;
+      case EQUAL   : found = true;
+                     PixelNode = location->info;
+                     break;
+    }
+  }
+}
+//------------------------------------------------------------------------------
+void PixelList::DeletePixelNode(PixelListNode PixelNode)
+{
+  PixelListNode* location = listData;
+  PixelListNode* tempLocation;
+
+  // Locate node to be deleted.
+  if (PixelNode == listData->info)
+  {
+    tempLocation = location;
+    listData = listData->next;		// Delete first node.
+  }
+  else
+  {
+    while (!(PixelNode==(location->next)->info))
+      location = location->next;
+
+      // Delete node at location->next
+      tempLocation = location->next;
+      location->next = (location->next)->next;
+  }
+  delete tempLocation;
+  length--;
+}
+//------------------------------------------------------------------------------
+void PixelList::ResetList()
+{
+  currentPos = NULL;
+}
+//------------------------------------------------------------------------------ 
+void PixelList::GetNextPixelNode(PixelListNode& PixelNode)
+{
+  if (currentPos == NULL)
+    currentPos = listData;
+  else
+    currentPos = currentPos->next;
+  PixelNode = currentPos->info;
+}
+//------------------------------------------------------------------------------
+PixelList::~PixelList()
+{
+  MakeEmpty();
+}
+

@@ -1,0 +1,598 @@
+//image.cpp
+
+#include <cstdlib>
+#include <iostream>
+#include <math.h>
+#include "image.h"
+
+using namespace std;
+
+//Default Constructor-----------------------------------------------------------
+ImageType::ImageType()
+{
+// cout << "\nEntering Default Constructor..." << endl;
+ N = 0;
+ M = 0;
+ Q = 0;
+
+ pixelValue = NULL;
+
+// cout << " Departing Default Constructor...\n" << endl;
+}
+//Parameter Constructor---------------------------------------------------------
+ImageType::ImageType(int tmpN, int tmpM, int tmpQ)
+{
+// cout << "\nEntering Parameter Constructor..." << endl;
+ N = tmpN;
+ M = tmpM;
+ Q = tmpQ;
+
+ pixelValue = new int* [N];//create a "single column" of pointers
+
+ for(int i = 0; i < N; i++)
+	{
+		pixelValue[i] = new int[M];//create row elements for the "col" of pointers
+			{
+				for(int j = 0; j < M; j++)
+					{			
+						pixelValue[i][j] = 0;
+					}				
+			}
+	}
+// cout << " Departing Parameter Constructor...\n" << endl;
+}
+//Copy Constructor--------------------------------------------------------------
+ImageType::ImageType(const ImageType &object)
+{
+// cout << "\nEntering Copy Constructor..." << endl;
+	N = object.N;
+	M = object.M;
+	Q = object.Q;
+
+	pixelValue = new int* [N];//allocate a "single column" of pointers
+
+	for(int i = 0; i < N; i++)//for each of the pointers in the new column...
+		{
+			pixelValue[i] = new int[M];//allocate "a row" of elements
+			for(int j = 0; j < M; j++)
+				pixelValue[i][j] = object.pixelValue[i][j];
+		}
+// cout << " Departing Copy Constructor...\n" << endl;
+}
+//------------------------------------------------------------------------------
+void ImageType::getImageInfo(int& rows, int& cols, int& levels)
+{
+ rows = N;
+ cols = M;
+ levels = Q;
+}
+//------------------------------------------------------------------------------
+void ImageType::getPixelVal(int i, int j, int& val)
+{
+ val = pixelValue[i][j];
+} 
+//------------------------------------------------------------------------------
+void ImageType::setImageInfo(int rows, int cols, int levels)
+{
+ N = rows;
+ M = cols;
+ Q = levels;
+} 
+//------------------------------------------------------------------------------
+void ImageType::setPixelVal(int i, int j, int val)
+{
+ pixelValue[i][j] = val;
+}
+//------------------------------------------------------------------------------
+int ImageType::computeAvgGrayLevel(const ImageType &object)
+{
+	int sum = 0;
+
+	for(int i = 0; i < object.N; i++)
+		for(int j = 0; j < object.M; j++)
+			sum += object.pixelValue[i][j];
+
+	return (sum/(N*M));
+}
+//------------------------------------------------------------------------------
+ImageType ImageType::enlargeImage(int e, ImageType &object)
+{
+	int i,j,k; 
+
+	ImageType temp(N, M, Q); //temp to contain all of object just incase
+	//temp2 needs to be a factor of (e) larger than the older
+	ImageType temp2(N*e, M*e, Q);
+
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			temp.pixelValue[i][j]=object.pixelValue[i][j]; //populate temp
+		}
+	}
+
+	for(i=0; i< N*e; i++)
+	{
+		for(j=0; j< M*e; j++)
+		{	//going through every element of object
+			temp2.pixelValue[i][j]=object.pixelValue[i/e][j/e]; 
+			/*putting it into temp 2, "i/e" & N*e" are walking through and putting
+			it in like Prof. Bebis's example*/
+		}		
+	}
+return (temp2);
+}
+//------------------------------------------------------------------------------
+ImageType ImageType::shrinkImage(int s, ImageType &object)//s is shrink factor
+{
+//NOTE a lot of this is not needed after, but was put in because object is
+//passed by reference
+
+	int i,j,k;
+
+	ImageType temp(N, M, Q);
+
+	ImageType temp2(N/s, M/s, Q);
+
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			temp.pixelValue[i][j]=object.pixelValue[i][j]; //populate temp
+		}
+	}
+
+
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			object.pixelValue[i][j]=0; // zero out object
+		}
+	}
+
+	for(i=0; i<N; i+=s)
+	{
+		for(j=0; j<M; j+=s)
+		{	//go through every other of object and populate it from temp	
+			object.pixelValue[i/s][j/s]=temp.pixelValue[i][j]; 
+		}		
+	}
+
+	for(i=0; i<N; i+=s)
+	{
+		for(j=0; j<M/s; j+=s)
+		{		
+			object.pixelValue[i/s][j/s]=temp.pixelValue[i][j]; //getting y values
+		}	
+	}
+
+	for(i = 0; i < (N/s)-1 ; i++)
+	{
+		for(j = 0; j < (M/s)-1; j++)
+		{	// setting it to temp2 to be returned
+			temp2.pixelValue[i][j]=object.pixelValue[i][j];
+		}
+	}
+	return(temp2);
+}
+//------------------------------------------------------------------------------
+void ImageType::getSubImage(int ULr,int ULc, int LRr,int LRc, ImageType& object)
+{
+	ImageType temp(N, M, Q);//declare a temp image object
+	int i = 0, j = 0;			//counter variables
+
+	//assign existing image to a temp object
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			temp.pixelValue[i][j]=object.pixelValue[i][j];
+		}
+	}
+
+	//reset all existing pixels to 0
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			object.pixelValue[i][j]=0;
+		}
+	}
+
+	//copy the original values from the temp object back into the original obj.
+	for(i = ULr; i <= LRr ; i++)
+	{
+		for(j = ULc; j <= LRc; j++)
+		{
+			object.pixelValue[i][j]=temp.pixelValue[i][j];
+		}
+	}
+}
+//------------------------------------------------------------------------------
+void ImageType::negateImage(ImageType &object)
+{
+	for(int i = 0; i < object.N; i++)
+		for(int j = 0; j < object.M; j++)
+		object.pixelValue[i][j] = abs(255 - object.pixelValue[i][j]);
+}
+//------------------------------------------------------------------------------
+void ImageType::reflectImage(ImageType &object)
+{
+	int i = 0, j = 0, H = 0, V = 0;
+	ImageType temp(N, M, Q);
+	char axis;
+
+	//assign existing image to a temp object
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			temp.pixelValue[i][j]=object.pixelValue[i][j];
+		}
+	}
+
+	//reset all existing pixels to 0
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			object.pixelValue[i][j]=0;
+		}
+	}
+	cout << "Would you like to reflect your image (V)ertically (about the ";
+	cout << "X-axis) or (H)orizontally (about the Y-axis)? ";
+	cin >> axis;
+
+		while((axis != 'H' && axis != 'h') && (axis != 'V' && axis != 'v'))
+		{
+			cout << "Axis must H/h or V/v. \nEnter again: ";
+			cin >> axis;
+		}
+
+	switch(axis)
+	{
+
+	case 'H':
+	case 'h':
+
+	//reflect temp object about Y axis
+	for(i = 0; i < N ; i++)
+		{
+			for(j = M -1 ; j >= 0; j--)
+				{
+					object.pixelValue[i][H] = temp.pixelValue[i][j];
+					H++;
+				}
+			H = 0;
+		}		
+
+	break;
+
+	case 'V':
+	case 'v':
+
+	//reflect temp object about X axis
+	for(j = 0; j < M-1 ; j++)
+		{
+			for(i = N-1 ; i >= 0; i--)
+				{
+					object.pixelValue[V][j] = temp.pixelValue[i][j];
+					V++;
+				}
+			V = 0;
+		}		
+	break;
+	}
+}
+//------------------------------------------------------------------------------
+ImageType ImageType::translateImage(int t, ImageType &object)
+{
+	int i,j,k;
+	ImageType temp(N, M, Q);
+
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			temp.pixelValue[i][j]=object.pixelValue[i][j];//assign object to temp
+		}
+	}
+
+	for(i = 0; i < N; i++)
+	{
+		for(j = 0; j < M; j++)
+		{
+			object.getPixelVal(i,j,Q);
+		        if((i + t < N) && (j + t < M)) 
+			temp.setPixelVal(i + t, j + t, Q);
+		}
+	}
+
+	return(temp);
+}
+//------------------------------------------------------------------------------
+void ImageType::rotateImage(float theta, ImageType &object)
+{
+	int N, M, Q, R, C;		//new row and column containers
+	int Xc, Yc;		//new center coordinates
+
+	object.getImageInfo(N, M, Q);
+
+	Xc = (int)(N/2 + 0.5);//X-coordinate integer center of image
+	Yc = (int)(M/2 + 0.5);//Y-coordinate integer center of image
+
+	ImageType temp(N, M, Q);//declare an image type object
+
+	//assign existing image to a temp object
+	for(int i = 0; i < N; i++)
+	{
+		for(int j = 0; j < M; j++)
+		{
+			temp.pixelValue[i][j] = object.pixelValue[i][j];
+		}
+	}
+
+	//reset all existing pixels to 0
+	for(int i = 0; i < N; i++)
+	{
+		for(int j = 0; j < M; j++)
+		{
+			object.pixelValue[i][j] = 0;
+		}
+	}
+
+	for(int i = 0; i < N; i++)
+		for(int j = 0; j < M; j++)
+			{	//calculate the row coordinate
+				R = Xc + int(((i - Xc)*(cos(theta)) - (j - Yc)*(sin(theta))) + 0.5);
+				//calculate the column coordinate
+				C = Yc + int(((i - Xc)*(sin(theta)) + (j - Yc)*(cos(theta))) + 0.5);
+
+				if(object.inBounds(R, C))//bounds check; out of bounds is black
+						object.pixelValue[R  = N-1][C = M-1] = 0;
+				//otherwise, re-populate the original image using new coordinates
+				object.pixelValue[R][C] = temp.pixelValue[i][j];
+			}
+}
+//------------------------------------------------------------------------------
+bool ImageType::inBounds(int R, int C)
+{
+	bool inBounds;	
+	//check row and column bounds
+	if((R < 0 || R > N - 1) || (C < 0 || C > M - 1))
+		{
+			return true;
+		}
+	else
+		return false;
+}
+//------------------------------------------------------------------------------
+ImageType ImageType::displayHistogram(ImageType& object, int& valley)
+{
+	int i,j;//incrementers
+	int value = 0, pixelCounter = 0, maxPixelCount = 0, highestBin;
+	
+	ImageType Histogram(256,256,255);//delcare an object for the histogram
+	int pixelBins[256];					//declare an array to hold pixel counts
+	
+	 //zeroize the pixel bins
+	for(i=0; i < 256; i++)
+	{
+		pixelBins[i] = 0;
+	}
+
+	//get, count and store each pixel value in appropriate bin
+	for(i=0; i < N; i++)
+	{
+		for(j=0; j < M; j++)
+		{
+			object.getPixelVal(i,j,value);
+			pixelBins[value]++;
+		}
+	}
+	//set the histogram array to all white
+	for(i = 0; i < Histogram.N; i++)
+	{
+		for(j = 0; j < Histogram.M; j++)
+		{
+			Histogram.pixelValue[i][j] = 255;
+		}
+	}
+	//smooth the histogram
+	for (i=0; i < 254; i+=2)
+	{
+		pixelBins[i+1] = (pixelBins[i]+pixelBins[i+2]) / 2;
+	}
+	for(i = 2; i < 254; i++)
+	{
+		pixelBins[i] =	(pixelBins[i+2] + pixelBins[i-2] + pixelBins[i+1] + 
+																				pixelBins[i-1]) / 4;
+	}
+	//find max pixelbin value	
+	for(i=0; i < Q; i++)
+	{
+		if(pixelBins[i] > maxPixelCount)
+			{
+				maxPixelCount = pixelBins[i];
+				highestBin = i;
+			}
+	}
+		cout << "\nMax pixel count is " << maxPixelCount << " in bin ";
+		cout << highestBin << ".\n";
+	
+	i = highestBin;
+	while (pixelBins[i] > pixelBins[i+1]) //find the bin with lowest pixel value
+	{
+		i++;
+	}
+
+	valley = i;//store bin with lowest value
+
+	for(i=0; i < Q-1; i++)
+	{
+		j = 0;
+		while(j < (double (pixelBins[i])/double (maxPixelCount))*255)
+		{
+			Histogram.pixelValue[255-j][i] = 0;
+			j++;
+		}
+	}
+
+  return(Histogram);
+}
+//------------------------------------------------------------------------------
+void ImageType::threshold(int threshold, ImageType &object)
+{
+	int pixelValue;
+ // threshold image 
+	for(int i=0; i<N; i++)
+		for(int j=0; j<M; j++) 
+			{
+				object.getPixelVal(i, j, pixelValue);
+				if(pixelValue < threshold)
+					object.setPixelVal(i, j, 0);
+				else
+					object.setPixelVal(i, j, 255);
+			}
+}
+//------------------------------------------------------------------------------
+void ImageType::dilate(ImageType& object)
+{
+	cout << "\nBeginning dilation...";
+
+	int dival;
+	ImageType temp(N,M,Q);
+	
+	temp = object;
+
+	for(int i = 1; i < N-1; i++)//for each row of object...
+	{
+		for(int j = 1; j < M-1; j++)//for each column of object...
+		{
+			for(int k = i-1; k< i+2; k++)//use eight neighbors here...
+			{
+				for(int l = j-1; l < j+2; l++)//and here...
+				{
+					object.getPixelVal(k,l,dival);//to check pixel value
+					if(dival == 255)//if it's 255...
+					{
+						temp.setPixelVal(i,j,dival);//set temp pixel value to dival
+					}
+				}
+			}									
+		}
+	}
+
+	object = temp;
+	cout << " \n Dilation complete.";
+}
+//------------------------------------------------------------------ ------------
+void ImageType::erode(ImageType& object)
+{
+		cout << "\nBeginning eroding...";
+	int erval;
+	ImageType temp(N,M,Q);
+	
+	temp = object;
+
+	for(int i = 1; i < N-1; i++)//for each row of object...
+	{
+		for(int j = 1; j < M-1; j++)//for each column of object...
+		{
+			for(int k = i-1; k< i+2; k++)//use eight neighbors here...
+			{
+				for(int l = j-1; l < j+2; l++)//and here...
+				{
+					object.getPixelVal(k,l,erval);//to check pixel value
+					if(erval == 0)//if it's 0
+					{
+						temp.setPixelVal(i,j,erval);//set temp pixel value to erval
+					}
+				}
+			}									
+		}
+	}
+
+	object = temp;
+	cout << " \n Eroding complete.\n";
+}
+//Overlaoded = Operator---------------------------------------------------------
+void ImageType::operator= (const ImageType &object)
+{
+//	cout << "\nEntering Overloaded = Operator..." << endl;
+	
+	for(int i = 0; i < N; i++) 	// deallocate the 2D array
+		{
+			delete [] pixelValue[i];// delete single column array of pointers
+		}
+
+	delete [] pixelValue;			// delete double pointer
+
+	N = object.N;
+	M = object.M;
+	Q = object.Q;
+
+	pixelValue = new int* [N];//allocate a "single column" of pointers
+
+	for(int i = 0; i < N; i++)//for each pointer in the single column...
+		{
+			pixelValue[i] = new int[M];//allocate "a row" of elements
+			for(int j = 0; j < M; j++)
+				pixelValue[i][j] = object.pixelValue[i][j];
+		}
+// cout << " Departing Overloaded = Operator...\n" << endl;
+}
+//Overlaoded + Operator---------------------------------------------------------
+ImageType ImageType::operator + (ImageType &object)
+{
+ cout << "\nEntering Overloaded + Operator..." << endl;
+
+	ImageType temp(N, M, Q);
+	float a = 0;
+
+	cout << "Enter the influence factor (between 0 and 1) your original image ";
+	cout << "should have on the second image: " << endl;
+
+	cin >> a;
+
+ for(int i = 0; i < N; i++)
+	{
+		for(int j = 0; j < M; j++)
+		temp.pixelValue[i][j] = (int)(a*pixelValue[i][j]
+															+ (1-a)*object.pixelValue[i][j]);
+	}
+ cout << " Departing Overloaded + Operator...\n" << endl;
+
+ return (temp);
+}
+//Overlaoded - Operator---------------------------------------------------------
+ImageType ImageType::operator - (ImageType &object)
+{
+	cout << "\nEntering Overloaded - Operator..." << endl;
+	ImageType temp(N, M, Q);
+
+	 for(int i = 0; i < N; i++)
+		{
+		  for(int j = 0; j < M; j++)
+		  temp.pixelValue[i][j] = abs(pixelValue[i][j] - object.pixelValue[i][j]);
+		}
+	cout << "Departing Overloaded - Operator...\n" << endl;
+	return (temp);
+}
+//Destructor-------------------------------------------------------------------
+ImageType::~ImageType()
+{
+// cout << "\nEntering Destructor..." << endl;
+
+	N = M = Q = 0;						// deinitialize N, M & Q
+
+   for(int i = 0; i < N; i++) 	// deallocation the 2D array
+		{
+			delete [] pixelValue[i];// delete "single column" of pointers
+		}
+
+	delete [] pixelValue;			// delete double pointer
+
+// cout << " Departing Destructor...\n" << endl;
+}

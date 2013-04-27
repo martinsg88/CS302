@@ -1,0 +1,24 @@
+#ifndef PIXELLISTNODE_H
+#define PIXELLISTNODE_H
+#include <iostream>
+
+//using namespace std;
+
+class PixelListNode
+{
+
+	public:
+		
+		int i;
+		int j;
+		PixelListNode *next;
+
+		PixelListNode() {i = 0; j = 0; next = NULL; }
+
+		PixelListNode(int x, int y)
+		{
+			i = x;
+			j = y;
+		{
+};
+#endif

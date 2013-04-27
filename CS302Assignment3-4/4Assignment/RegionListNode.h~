@@ -1,0 +1,23 @@
+#ifndef REGIONLISTNODE_H
+#define REGIONLISTNODE_H
+#include <iostream>
+#include "PixelList.h"
+
+//using namespace std;
+
+class RegionListNode
+{
+
+	public:
+		
+		int regionID;
+		int size;
+		float Xcentroid;
+		float Ycentroid;
+		PixelList pixelList;
+
+		RegionListNode *next;
+
+		RegionListNode();
+};
+#endif

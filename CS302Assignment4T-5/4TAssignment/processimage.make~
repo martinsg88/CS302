@@ -1,0 +1,35 @@
+processimage.bin: processImageMain.o image.o ReadImageHeader.o ReadImage.o WriteImage.o DFSstack.o BFSqueue.o RegionType.o RegionList.o PixelType.o PixelList.o
+	g++ -o processimage.bin processImageMain.o image.o ReadImageHeader.o ReadImage.o WriteImage.o DFSstack.o BFSqueue.o RegionType.oRegionList.o  PixelType.o  PixelList.o
+
+processImageMain.o: processImageMain.cpp image.h RegionList.cpp RegionType.h PixelList.cpp PixelType.h
+	g++ -c processImageMain.cpp
+
+ReadImageHeader.o: image.h ReadImageHeader.cpp
+	g++ -c ReadImageHeader.cpp
+
+ReadImage.o: image.h ReadImage.cpp
+	g++ -c ReadImage.cpp
+
+WriteImage.o: image.h WriteImage.cpp
+	g++ -c WriteImage.cpp
+
+image.o: image.h image.cpp
+	g++ -c image.cpp
+
+DFSstack.o: DFSstack.h DFSstack.cpp BDFSNode/BDFSNode.h
+	g++ -c DFSstack.cpp
+
+BFSqueue.o: BFSqueue.h BFSqueue.cpp BDFSNode/BDFSNode.h
+	g++ -c BFSqueue.cpp
+
+RegionType.o: RegionType.h RegionType.cpp
+	g++ -c RegionType.cpp
+
+PixelType.o: PixelType.h PixelType.cpp
+	g++ -c PixelType.cpp
+
+RegionList.o: RegionList.cpp
+	g++ -c RegionList.cpp
+
+PixelList.o: PixelList.cpp 
+	g++ -c PixelList.cpp

@@ -1,0 +1,49 @@
+#ifndef IMAGE_H
+#define IMAGE_H
+
+// a simple example - you would need to add more funtions
+
+class ImageType
+{
+
+ private:
+   int N, M, Q;		//N = rows, M = columns, Q = level
+   int **pixelValue;	//double pointer for dynamically created 2D array
+
+ public:
+	//constructors	
+	ImageType();						//Default Constructor
+	ImageType(int, int, int);			//Parameter Constructor
+	ImageType(const ImageType &object);	//Copy Constructor
+
+	//getters
+	void getImageInfo(int&, int&, int&);
+	void getPixelVal(int, int, int&);
+	void getSubImage(int, int, int, int, ImageType&);
+
+	//setters
+	void setImageInfo(int, int, int);
+	void setPixelVal(int, int, int);
+
+	//modifiers
+	int computeAvgGrayLevel(const ImageType&);
+	ImageType enlargeImage(int, ImageType&);
+	ImageType shrinkImage(int, ImageType&);
+	void negateImage(ImageType&);
+	void reflectImage(ImageType&);
+	ImageType translateImage(int, ImageType&);
+	void rotateImage(int, int, float, ImageType&);
+
+	//observers
+	bool inBounds(int, int);
+
+	//Overloaded operators
+	void operator= (const ImageType &object);
+	ImageType operator + (ImageType &object);
+	ImageType operator - (ImageType &object);
+
+	//destructor
+	~ImageType();
+};
+
+#endif

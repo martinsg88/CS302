@@ -1,0 +1,74 @@
+//ReadImage.cpp
+
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+
+#include "image.h"
+
+using namespace std;
+
+int readImage(char fname[], ImageType& image)
+{
+ int N, M, Q;					//ROW, COL, Gray-level
+ unsigned char *charImage;
+ char header[100], *ptr;
+ ifstream fin;
+
+ fin.open(fname, ios::in | ios::binary);
+
+ if (!fin)
+ {
+   cout << "Can't read image: " << fname << endl;
+   exit(1);
+ }
+
+ // read header
+
+ fin.getline(header, 100, '\n');
+ if ((header[0] != 80) || /*'P'*/ (header[1] != 53) /*'5'*/)
+	{   
+      cout << "Image " << fname << " is not PGM" << endl;
+      exit(1);
+	}
+
+ fin.getline(header, 100, '\n');
+
+ while(header[0] == '#')
+   fin.getline(header, 100, '\n');
+
+ N = atoi(ptr);					//set ROW
+ M = strtol(header,&ptr,0);		//set COL
+
+ fin.getline(header, 100, '\n');
+ 
+ Q = strtol(header, &ptr, 0);	//set Gray-level
+
+ charImage = (unsigned char *) new unsigned char [M*N];
+
+ fin.read( reinterpret_cast<char *>(charImage), (M*N)*sizeof(unsigned char));
+
+ if (fin.fail())
+ {
+   cout << "Image " << fname << " has wrong size" << endl;
+   exit(1);
+ }
+
+ fin.close();
+
+ // Convert the unsigned characters to integers
+
+ int val;
+
+ for(int i = 0; i < N; i++)
+   for(int j = 0; j < M; j++)
+	{
+     val = (int)charImage[i*M + j];
+     image.setPixelVal(i, j, val);     
+	}
+
+ delete [] charImage;
+
+ return (1);
+
+}

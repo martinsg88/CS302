@@ -1,0 +1,14 @@
+// RegionNode.h. #ifndef REGIONNODE_H
+#define REGIONNODE_H
+#include <fstream>enum RelationType  {LESS, GREATER, EQUAL};
+class RegionNode{ public:
+
+	int ID;
+	int Size;
+	float cenX;
+	float cenY;
+	RegionNode* info;
+	RegionNode* next;
+	
+	//RegionNode();
+};#endif

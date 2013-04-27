@@ -1,0 +1,59 @@
+#include "RegionList.h"
+//Constructor-------------------------------------------------------------------
+RegionList::RegionList()
+{
+	length = 0;
+	listData = NULL;
+	currentPos = NULL;	
+}
+//------------------------------------------------------------------------------
+int RegionList::GetLength() const
+{
+  return length;
+}
+//------------------------------------------------------------------------------
+void RegionList::MakeEmpty()
+{
+  RegionListNode* tempPtr;
+
+  while (listData != NULL)
+  {
+    tempPtr = listData;
+    listData = listData->next;
+    delete tempPtr;
+  }
+  length = 0;
+}
+//------------------------------------------------------------------------------
+int RegionList::RetrieveRegionID() const
+{
+	return currentPos->regionID;
+}
+//------------------------------------------------------------------------------
+void RegionList::InsertRegion(RegionListNode Region)
+{
+}
+//------------------------------------------------------------------------------
+void RegionList::DeleteRegion(RegionListNode Region)
+{
+}
+//------------------------------------------------------------------------------
+void RegionList::ResetList()
+{
+  currentPos = NULL;
+} 
+//------------------------------------------------------------------------------
+void RegionList::GetNextRegion(int& RID)
+{
+  if (currentPos == NULL)
+    currentPos = listData;
+
+  RID = currentPos->regionID;
+  currentPos = currentPos->next;
+} 
+//------------------------------------------------------------------------------
+RegionList::~RegionList()
+{
+  MakeEmpty();
+}
+//------------------------------------------------------------------------------
